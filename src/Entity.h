@@ -12,6 +12,20 @@ public:
     void setPosition(float x, float y);
     void move(float dx, float dy);
 
+    // Setters and Getters for velocity and gravity
+    void setVelocity(float vx, float vy);
+    void setVelocityX(float vx);
+    void setVelocityY(float vy);
+
+    float getVelocityX() const;
+    float getVelocityY() const;
+
+    void setGravityEnabled(bool enabled);
+    bool isGravityEnabled() const;
+
+    void setGrounded(bool grounded);
+    bool isGrounded() const;
+
     void setTexture(SDL_Texture* texture);
 
     void setSpriteSheet(int frameCount, int frameWidth, int frameHeight);
@@ -28,6 +42,10 @@ private:
     float y;
     float width;
     float height;
+    float velocityX;
+    float velocityY;
+    bool gravityEnabled;
+    bool grounded;
 
     SDL_Texture* texture;
 
