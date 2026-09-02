@@ -19,6 +19,11 @@ Entity::Entity(float x, float y, float width, float height)
     frameHeight = 0;
     currentFrame = 0;
     animationCounter = 0;
+
+    // Timed-animation fields, unused unless setAnimationSpeed() is called
+    frameDuration = 0.0f;
+    animationTimer = 0.0f;
+    useTimedAnimation = false;
 }
 
 void Entity::render(SDL_Renderer* renderer)
@@ -104,6 +109,37 @@ void Entity::updateAnimation()
     if (animationCounter >= 100) {
         currentFrame = (currentFrame + 1) % frameCount;
         animationCounter = 0;
+    }
+}
+
+void Entity::setAnimationSpeed(float framesPerSecond)
+{
+    // Lets a specific entity opt into exact-fps animation instead of the default fixed-tick counter
+    if (framesPerSecond <= 0.0f) {
+        useTimedAnimation = false;
+        return;
+    }
+    frameDuration = 1.0f / framesPerSecond;
+    useTimedAnimation = true;
+}
+
+void Entity::updateAnimation(float deltaTime)
+{
+    if (frameCount <= 1)
+    {
+        return;
+    }
+    
+    if (!useTimedAnimation) {
+        updateAnimation();
+        return;
+    }
+
+    animationTimer += deltaTime;
+
+    if (animationTimer >= frameDuration) {
+        currentFrame = (currentFrame + 1) % frameCount;
+        animationTimer -= frameDuration; // keep leftover time instead of dropping it
     }
 }
 

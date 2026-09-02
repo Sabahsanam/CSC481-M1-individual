@@ -31,6 +31,10 @@ public:
     void setSpriteSheet(int frameCount, int frameWidth, int frameHeight);
     void updateAnimation();
 
+    // Real-time animation for entities that need an exact frame rate
+    void setAnimationSpeed(float framesPerSecond);
+    void updateAnimation(float deltaTime);
+
     // Getters
     float getX() const;
     float getY() const;
@@ -54,6 +58,11 @@ private:
     int frameHeight;
     int currentFrame;
     int animationCounter;
+
+    // Only used if setAnimationSpeed() is called
+    float frameDuration;
+    float animationTimer;
+    bool useTimedAnimation;
 };
 
 #endif

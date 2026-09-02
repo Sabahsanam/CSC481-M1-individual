@@ -13,6 +13,7 @@ add_executable(
     src/Entity.cpp
     src/Physics.cpp
     src/Input.cpp
+    src/Collision.cpp
 )
 
 target_link_libraries(
