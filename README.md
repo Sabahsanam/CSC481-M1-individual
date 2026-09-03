@@ -16,7 +16,7 @@ Follow these steps to clone, build, and run the project on your machine:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/AlexanderCard/CSC481-581-M1.git
+git clone https://github.com/mglenn001/CSC481-581Project.git
 ```
 
 ----------
