@@ -11,6 +11,8 @@ add_executable(
     main
     src/main.cpp
     src/Entity.cpp
+    src/Physics.cpp
+    src/Input.cpp
 )
 
 target_link_libraries(

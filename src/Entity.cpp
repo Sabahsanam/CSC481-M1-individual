@@ -7,6 +7,11 @@ Entity::Entity(float x, float y, float width, float height)
     this->width = width;
     this->height = height;
 
+    velocityX = 0.0f;
+    velocityY = 0.0f;
+    gravityEnabled = false;
+    grounded = false;
+
     texture = nullptr;
 
     frameCount = 1;
@@ -120,4 +125,50 @@ float Entity::getWidth() const
 float Entity::getHeight() const
 {
     return height;
+}
+
+void Entity::setVelocity(float vx, float vy)
+{
+    velocityX = vx;
+    velocityY = vy;
+}
+
+void Entity::setVelocityX(float vx)
+{
+    velocityX = vx;
+}
+
+void Entity::setVelocityY(float vy)
+{
+    velocityY = vy;
+}
+
+float Entity::getVelocityX() const
+{
+    return velocityX;
+}
+
+float Entity::getVelocityY() const
+{
+    return velocityY;
+}
+
+void Entity::setGravityEnabled(bool enabled)
+{
+    gravityEnabled = enabled;
+}
+
+bool Entity::isGravityEnabled() const
+{
+    return gravityEnabled;
+}
+
+void Entity::setGrounded(bool grounded)
+{
+    this->grounded = grounded;
+}
+
+bool Entity::isGrounded() const
+{
+    return grounded;
 }
