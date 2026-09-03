@@ -1,5 +1,5 @@
 # CSC481-581Project
-Creating a game engine foundation
+The Game Engine Construction Project is designed to help you gain comprehensive, hands-on experience in the design, development, integration, and testing of a functional game engine. You will also implement individual games using your team engine to showcase system functionalities. This project allows you to develop and demonstrate competencies in game engine architecture, system implementation, and problem-solving as applied to real-world game development scenarios.
 
 ## Team 8
 
