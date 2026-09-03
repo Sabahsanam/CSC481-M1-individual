@@ -3,11 +3,11 @@ Creating a game engine foundation
 
 ## Team 8
 
-[name, unityID]
+Sabah Afroz, safroz
 
 Mia Glenn, mglenn2
 
-[name, unityID]
+Tram Nguyen, tnnguy22
 
 ##  Setup Instructions
 
