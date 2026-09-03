@@ -5,9 +5,26 @@
 #include "Entity.h"
 #include "Physics.h"
 #include "Input.h"
+#include "Collision.h"
+#include "Scaling.h"
 
 const int WINDOW_WIDTH = 1920;
 const int WINDOW_HEIGHT = 1080;
+
+// enemy_skull.png: 192x32 total, 6 frames of 32x32, 8fps
+const int SKULL_FRAME_COUNT = 6;
+const int SKULL_FRAME_W = 32;
+const int SKULL_FRAME_H = 32;
+
+// swirlingorb.png: 512x128 total, 4 frames of 128x128, 6fps
+const int PORTAL_FRAME_COUNT = 4;
+const int PORTAL_FRAME_W = 128;
+const int PORTAL_FRAME_H = 128;
+
+// totem.png: 512x192 total, 8 frames of 64x192, 8fps
+const int TOTEM_FRAME_COUNT = 8;
+const int TOTEM_FRAME_W = 64;
+const int TOTEM_FRAME_H = 192;
 
 int main(int argc, char *argv[])
 {
@@ -34,12 +51,35 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    int actualWidth;
+    int actualHeight;
+
+    SDL_GetWindowSize(
+        window,
+        &actualWidth,
+        &actualHeight
+    );
+
+    // Set the reference resolution for proportional scaling
+    Scaling::setReferenceResolution(actualWidth, actualHeight);
+
+    // Tracks whether the scale toggle key was pressed in the previous frame
+    bool scaleKeyWasPressed = false;
+
+    const float GROUND_Y = actualHeight - 150.0f;
+
+    const float BRICK_WIDTH = 96.0f;
+    const float BRICK_HEIGHT = 32.0f;
+
+    // Area with no bricks
+    const float GAP_START = 900.0f;
+    const float GAP_END = 1200.0f;
+
     const float START_X = 100.0f;
     const float START_Y = 100.0f;
 
     // Create one generic entity
     Entity player(START_X, START_Y, 200.0f, 200.0f);
-
 
     // Create a Physics instance
     Physics physics;
@@ -47,6 +87,25 @@ int main(int argc, char *argv[])
     // Enable gravity for the player
     player.setGravityEnabled(true);
     physics.setGravity(900.0f); // Set gravity strength (pixels per second squared)
+
+    const float PORTAL_SPAWN_X = START_X;
+    const float PORTAL_SPAWN_Y = GROUND_Y - player.getHeight();
+
+    // Totem: static object, player must jump over it
+    Entity totem(400.0f, GROUND_Y - TOTEM_FRAME_H, (float)TOTEM_FRAME_W, (float)TOTEM_FRAME_H);
+    totem.setGravityEnabled(false); // it's static, it never moves
+
+    // Enemy skull: auto-moving patrol enemy, floats (no gravity)
+    Entity enemySkull(GAP_START, GROUND_Y - 150.0f, (float)SKULL_FRAME_W, (float)SKULL_FRAME_H);
+    enemySkull.setGravityEnabled(false);
+    float skullPatrolMinX = GAP_START;
+    float skullPatrolMaxX = GAP_END;
+    float skullSpeed = 150.0f;
+    int skullDirection = 1; // 1 = right, -1 = left
+
+    // Portal: purely visual "respawn point" marker
+    Entity portal(START_X - 40.0f, GROUND_Y - PORTAL_FRAME_H, (float)PORTAL_FRAME_W, (float)PORTAL_FRAME_H);
+    portal.setGravityEnabled(false);
 
     // Load the player's sprite texture
     SDL_Texture* playerTexture =
@@ -77,23 +136,29 @@ int main(int argc, char *argv[])
         );
     }
 
-    int actualWidth;
-    int actualHeight;
+    // Load and assign totem textures/sprite sheets
+    SDL_Texture* totemTexture = IMG_LoadTexture(renderer, "../assets/totem.png");
+    if (totemTexture) {
+        totem.setTexture(totemTexture);
+        totem.setSpriteSheet(TOTEM_FRAME_COUNT, TOTEM_FRAME_W, TOTEM_FRAME_H);
+        totem.setAnimationSpeed(8.0f);
+    }
 
-    SDL_GetWindowSize(
-        window,
-        &actualWidth,
-        &actualHeight
-    );
+    // Load and assign skull textures/sprite sheets
+    SDL_Texture* skullTexture = IMG_LoadTexture(renderer, "../assets/enemy_skull.png");
+    if (skullTexture) {
+        enemySkull.setTexture(skullTexture);
+        enemySkull.setSpriteSheet(SKULL_FRAME_COUNT, SKULL_FRAME_W, SKULL_FRAME_H);
+        enemySkull.setAnimationSpeed(8.0f);
+    }
 
-    const float GROUND_Y = actualHeight - 150.0f;
-
-    const float BRICK_WIDTH = 96.0f;
-    const float BRICK_HEIGHT = 32.0f;
-
-    // Area with no bricks
-    const float GAP_START = 900.0f;
-    const float GAP_END = 1200.0f;
+    // Load and assign portal textures/sprite sheets
+    SDL_Texture* portalTexture = IMG_LoadTexture(renderer, "../assets/swirlingorb.png");
+    if (portalTexture) {
+        portal.setTexture(portalTexture);
+        portal.setSpriteSheet(PORTAL_FRAME_COUNT, PORTAL_FRAME_W, PORTAL_FRAME_H);
+        portal.setAnimationSpeed(6.0f);
+    }
 
     bool running = true;
     SDL_Event event;
@@ -123,6 +188,16 @@ int main(int argc, char *argv[])
         // Shift + A: run left
         // Shift + D: run right
 
+        // Toggle scaling mode with the T key
+        bool scaleKeyIsPressed = Input::isKeyPressed(SDL_SCANCODE_T);
+        if (scaleKeyIsPressed && !scaleKeyWasPressed) {
+            Scaling::toggleMode();
+            SDL_Log(
+                "Scaling mode: %s",
+                (Scaling::getMode() == ScalingMode::PROPORTIONAL) ? "PROPORTIONAL" : "PIXEL"
+            );
+        }
+        scaleKeyWasPressed = scaleKeyIsPressed;
 
         // Input for Jumping (W key)
         if (Input::isKeyPressed(SDL_SCANCODE_W)) {
@@ -192,12 +267,12 @@ int main(int argc, char *argv[])
         if (player.getY() > actualHeight) {
 
             SDL_Log(
-                "Player fell! Resetting to spawn point."
+                "Player fell! Respawning at the portal."
             );
 
             player.setPosition(
-                START_X,
-                START_Y
+                PORTAL_SPAWN_X,
+                PORTAL_SPAWN_Y
             );
 
             player.setVelocity(
@@ -205,7 +280,40 @@ int main(int argc, char *argv[])
                 0.0f
             );
 
-            player.setGrounded(false);
+            player.setGrounded(true);
+        }
+
+        // Collision: totem blocks the player like a wall
+        if (Collision::checkCollision(player, totem)) {
+            if (Input::isKeyPressed(SDL_SCANCODE_A)) {
+                player.move(moveSpeed * deltaTime, 0.0f);
+            }
+            if (Input::isKeyPressed(SDL_SCANCODE_D)) {
+                player.move(-moveSpeed * deltaTime, 0.0f);
+            }
+        }
+
+        // Collision: enemy (ex: skull) sends player (ex: nxy) back to the portal
+        if (Collision::checkCollision(player, enemySkull)) {
+            SDL_Log("Player touched an enemy! Respawning at the portal.");
+            player.setPosition(
+                PORTAL_SPAWN_X,
+                PORTAL_SPAWN_Y
+            );
+            player.setVelocity(
+                0.0f,
+                0.0f
+            );
+            player.setGrounded(true);
+        }
+
+        // Enemy patrol movement
+        enemySkull.move(skullSpeed * skullDirection * deltaTime, 0.0f);
+        if (enemySkull.getX() >= skullPatrolMaxX) {
+            skullDirection = -1;
+        }
+        if (enemySkull.getX() <= skullPatrolMinX) {
+            skullDirection = 1;
         }
 
         // Set background color to sage green
@@ -216,10 +324,19 @@ int main(int argc, char *argv[])
 
         // Render the brick ground
         if (brickTexture) {
+            float groundScaleX = 1.0f;
+            float groundScaleY = 1.0f;
+            
+            if (Scaling::getMode() == ScalingMode::PROPORTIONAL) {
+                int windowWidth = 0;
+                int windowHeight = 0;
+                SDL_GetRenderOutputSize(renderer, &windowWidth, &windowHeight);
+                Scaling::getScaleFactors(windowWidth, windowHeight, groundScaleX, groundScaleY);
+            }
 
             for (
                 float x = 0.0f;
-                x < actualWidth;
+                x < WINDOW_WIDTH;
                 x += BRICK_WIDTH
             ) {
 
@@ -232,10 +349,10 @@ int main(int argc, char *argv[])
                 }
 
                 SDL_FRect brickRect = {
-                    x,
-                    GROUND_Y,
-                    BRICK_WIDTH,
-                    BRICK_HEIGHT
+                    x * groundScaleX,
+                    GROUND_Y * groundScaleY,
+                    BRICK_WIDTH * groundScaleX,
+                    BRICK_HEIGHT * groundScaleY
                 };
 
                 SDL_RenderTexture(
@@ -249,8 +366,14 @@ int main(int argc, char *argv[])
 
         // Update the sprite animation
         player.updateAnimation();
+        enemySkull.updateAnimation(deltaTime);
+        totem.updateAnimation(deltaTime);
+        portal.updateAnimation(deltaTime);
 
         // Render the entity
+        portal.render(renderer);
+        totem.render(renderer);
+        enemySkull.render(renderer);
         player.render(renderer);
 
         // Show the frame
@@ -263,6 +386,15 @@ int main(int argc, char *argv[])
     }
     if (brickTexture) {
         SDL_DestroyTexture(brickTexture);
+    }
+    if (totemTexture) {
+        SDL_DestroyTexture(totemTexture);
+    }
+    if (skullTexture) {
+        SDL_DestroyTexture(skullTexture);
+    }
+    if (portalTexture) {
+        SDL_DestroyTexture(portalTexture);
     }
 
     SDL_DestroyRenderer(renderer);
