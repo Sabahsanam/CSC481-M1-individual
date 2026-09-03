@@ -28,11 +28,33 @@ Entity::Entity(float x, float y, float width, float height)
 
 void Entity::render(SDL_Renderer* renderer)
 {
+    float drawX = x;
+    float drawY = y;
+    float drawWidth = width;
+    float drawHeight = height;
+
+    // PIXEL mode (default) leaves everything as-is.
+    // PROPORTIONAL mode resizes/repositions relative to the window's current size vs. the reference resolution.
+    if (Scaling::getMode() == ScalingMode::PROPORTIONAL) {
+        int windowWidth = 0;
+        int windowHeight = 0;
+        SDL_GetRenderOutputSize(renderer, &windowWidth, &windowHeight);
+
+        float scaleX = 1.0f;
+        float scaleY = 1.0f;
+        Scaling::getScaleFactors(windowWidth, windowHeight, scaleX, scaleY);
+
+        drawX = x * scaleX;
+        drawY = y * scaleY;
+        drawWidth = width * scaleX;
+        drawHeight = height * scaleY;
+    }
+
     SDL_FRect destinationRect = {
-        x,
-        y,
-        width,
-        height
+        drawX,
+        drawY,
+        drawWidth,
+        drawHeight
     };
 
     if (texture != nullptr) {

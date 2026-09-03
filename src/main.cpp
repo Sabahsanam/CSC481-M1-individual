@@ -6,6 +6,7 @@
 #include "Physics.h"
 #include "Input.h"
 #include "Collision.h"
+#include "Scaling.h"
 
 const int WINDOW_WIDTH = 1920;
 const int WINDOW_HEIGHT = 1080;
@@ -58,6 +59,12 @@ int main(int argc, char *argv[])
         &actualWidth,
         &actualHeight
     );
+
+    // Set the reference resolution for proportional scaling
+    Scaling::setReferenceResolution(actualWidth, actualHeight);
+
+    // Tracks whether the scale toggle key was pressed in the previous frame
+    bool scaleKeyWasPressed = false;
 
     const float GROUND_Y = actualHeight - 150.0f;
 
@@ -181,6 +188,16 @@ int main(int argc, char *argv[])
         // Shift + A: run left
         // Shift + D: run right
 
+        // Toggle scaling mode with the T key
+        bool scaleKeyIsPressed = Input::isKeyPressed(SDL_SCANCODE_T);
+        if (scaleKeyIsPressed && !scaleKeyWasPressed) {
+            Scaling::toggleMode();
+            SDL_Log(
+                "Scaling mode: %s",
+                (Scaling::getMode() == ScalingMode::PROPORTIONAL) ? "PROPORTIONAL" : "PIXEL"
+            );
+        }
+        scaleKeyWasPressed = scaleKeyIsPressed;
 
         // Input for Jumping (W key)
         if (Input::isKeyPressed(SDL_SCANCODE_W)) {
@@ -307,10 +324,19 @@ int main(int argc, char *argv[])
 
         // Render the brick ground
         if (brickTexture) {
+            float groundScaleX = 1.0f;
+            float groundScaleY = 1.0f;
+            
+            if (Scaling::getMode() == ScalingMode::PROPORTIONAL) {
+                int windowWidth = 0;
+                int windowHeight = 0;
+                SDL_GetRenderOutputSize(renderer, &windowWidth, &windowHeight);
+                Scaling::getScaleFactors(windowWidth, windowHeight, groundScaleX, groundScaleY);
+            }
 
             for (
                 float x = 0.0f;
-                x < actualWidth;
+                x < WINDOW_WIDTH;
                 x += BRICK_WIDTH
             ) {
 
@@ -323,10 +349,10 @@ int main(int argc, char *argv[])
                 }
 
                 SDL_FRect brickRect = {
-                    x,
-                    GROUND_Y,
-                    BRICK_WIDTH,
-                    BRICK_HEIGHT
+                    x * groundScaleX,
+                    GROUND_Y * groundScaleY,
+                    BRICK_WIDTH * groundScaleX,
+                    BRICK_HEIGHT * groundScaleY
                 };
 
                 SDL_RenderTexture(

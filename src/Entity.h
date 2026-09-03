@@ -2,6 +2,7 @@
 #define ENTITY_H
 
 #include <SDL3/SDL.h>
+#include "Scaling.h"
 
 class Entity {
 public:

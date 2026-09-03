@@ -14,6 +14,7 @@ add_executable(
     src/Physics.cpp
     src/Input.cpp
     src/Collision.cpp
+    src/Scaling.cpp
 )
 
 target_link_libraries(
