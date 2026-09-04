@@ -27,6 +27,8 @@ target_link_libraries(
 add_executable(
     sabah_game
     src/sabah_main.cpp
+    src/Camera.cpp
+    src/WorldGenerator.cpp
     src/Entity.cpp
     src/Physics.cpp
     src/Input.cpp
