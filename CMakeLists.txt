@@ -23,3 +23,20 @@ target_link_libraries(
     SDL3::SDL3
     SDL3_image::SDL3_image
 )
+
+add_executable(
+    sabah_game
+    src/sabah_main.cpp
+    src/Entity.cpp
+    src/Physics.cpp
+    src/Input.cpp
+    src/Collision.cpp
+    src/Scaling.cpp
+)
+
+target_link_libraries(
+    sabah_game
+    PRIVATE
+    SDL3::SDL3
+    SDL3_image::SDL3_image
+)
