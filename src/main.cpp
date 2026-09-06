@@ -28,13 +28,13 @@ const int TOTEM_FRAME_H = 192;
 
 int main(int argc, char *argv[])
 {
-    // Initialize SDL
+    // Initializes SDL
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         SDL_Log("Could not initialize SDL: %s", SDL_GetError());
         return 1;
     }
 
-    // Create window and renderer
+    // Creates window and renderer
     SDL_Window *window = nullptr;
     SDL_Renderer *renderer = nullptr;
 
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
         &actualHeight
     );
 
-    // Set the reference resolution for proportional scaling
+    // Sets the reference resolution for proportional scaling
     Scaling::setReferenceResolution(actualWidth, actualHeight);
 
     // Tracks whether the scale toggle key was pressed in the previous frame
@@ -78,24 +78,24 @@ int main(int argc, char *argv[])
     const float START_X = 100.0f;
     const float START_Y = 100.0f;
 
-    // Create one generic entity
+    // Creates one generic entity
     Entity player(START_X, START_Y, 200.0f, 200.0f);
 
-    // Create a Physics instance
+    // Creates a Physics instance
     Physics physics;
 
-    // Enable gravity for the player
+    // Enables gravity for the player
     player.setGravityEnabled(true);
     physics.setGravity(900.0f); // Set gravity strength (pixels per second squared)
 
     const float PORTAL_SPAWN_X = START_X;
     const float PORTAL_SPAWN_Y = GROUND_Y - player.getHeight();
 
-    // Totem: static object, player must jump over it
+    // Totem static object, player must jump over it
     Entity totem(400.0f, GROUND_Y - TOTEM_FRAME_H, (float)TOTEM_FRAME_W, (float)TOTEM_FRAME_H);
     totem.setGravityEnabled(false); // it's static, it never moves
 
-    // Enemy skull: auto-moving patrol enemy, floats (no gravity)
+    // Enemy skull auto-moving patrol enemy, floats (no gravity)
     Entity enemySkull(GAP_START, GROUND_Y - 150.0f, (float)SKULL_FRAME_W, (float)SKULL_FRAME_H);
     enemySkull.setGravityEnabled(false);
     float skullPatrolMinX = GAP_START;
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
     float skullSpeed = 150.0f;
     int skullDirection = 1; // 1 = right, -1 = left
 
-    // Portal: purely visual "respawn point" marker
+    // Portal --> purely visual "respawn point" marker
     Entity portal(START_X - 40.0f, GROUND_Y - PORTAL_FRAME_H, (float)PORTAL_FRAME_W, (float)PORTAL_FRAME_H);
     portal.setGravityEnabled(false);
 
@@ -111,18 +111,18 @@ int main(int argc, char *argv[])
     SDL_Texture* playerTexture =
         IMG_LoadTexture(renderer, "../assets/darkworld_enemy_nyx_idle.png");
 
-    // Check if the texture loaded correctly
+    // Checks if the texture loaded correctly
     if (!playerTexture) {
         SDL_Log("Could not load texture: %s", SDL_GetError());
     }
     else {
         player.setTexture(playerTexture);
 
-        // Tell the entity how the sprite sheet is arranged
+        // Tells the entity how the sprite sheet is arranged
         player.setSpriteSheet(8, 128, 128);
     }
 
-    // Load the brick
+    // Loads the brick
     SDL_Texture* brickTexture =
         IMG_LoadTexture(
             renderer,
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
         );
     }
 
-    // Load and assign totem textures/sprite sheets
+    // Loads and assign totem textures/sprite sheets
     SDL_Texture* totemTexture = IMG_LoadTexture(renderer, "../assets/totem.png");
     if (totemTexture) {
         totem.setTexture(totemTexture);
@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
         totem.setAnimationSpeed(8.0f);
     }
 
-    // Load and assign skull textures/sprite sheets
+    // Loads and assigns skull textures/sprite sheets
     SDL_Texture* skullTexture = IMG_LoadTexture(renderer, "../assets/enemy_skull.png");
     if (skullTexture) {
         enemySkull.setTexture(skullTexture);
@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
         enemySkull.setAnimationSpeed(8.0f);
     }
 
-    // Load and assign portal textures/sprite sheets
+    // Loads and assigns portal textures/sprite sheets
     SDL_Texture* portalTexture = IMG_LoadTexture(renderer, "../assets/swirlingorb.png");
     if (portalTexture) {
         portal.setTexture(portalTexture);
@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
         // Shift + A: run left
         // Shift + D: run right
 
-        // Toggle scaling mode with the T key
+        // Toggles scaling mode with the T key
         bool scaleKeyIsPressed = Input::isKeyPressed(SDL_SCANCODE_T);
         if (scaleKeyIsPressed && !scaleKeyWasPressed) {
             Scaling::toggleMode();

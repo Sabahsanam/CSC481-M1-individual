@@ -52,7 +52,7 @@ public:
     // Clears everything and generates a safe starting area.
     void reset();
 
-    // ---- Accessors for main.cpp to use for collision/rendering ----
+    //  Accessors for main.cpp to use for collision/rendering 
     std::vector<GroundSegment>& getGroundSegments();
     std::vector<Entity>& getPlatforms();
     std::vector<Entity>& getObstacles();

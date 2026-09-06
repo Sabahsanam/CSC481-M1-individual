@@ -10,13 +10,6 @@
 #include "Camera.h"
 #include "WorldGenerator.h"
 
-// ============================================================
-// SABAH'S INDIVIDUAL GAME
-// Endless cute-princess side-scrolling platformer.
-// Engine (Entity/Physics/Input/Collision/Scaling) untouched.
-// Game-specific: Camera, WorldGenerator, and everything below.
-// ============================================================
-
 const int WINDOW_WIDTH = 1920;
 const int WINDOW_HEIGHT = 1080;
 
@@ -59,7 +52,7 @@ int main(int argc, char* argv[])
 
     const float GROUND_Y = actualHeight - 150.0f;
 
-    // ---- Load textures ----
+    // Load textures 
     SDL_Texture* backgroundTexture = IMG_LoadTexture(renderer, "../assets/background.png");
     SDL_Texture* cloudTexture = IMG_LoadTexture(renderer, "../assets/cloud.png");
     SDL_Texture* playerTexture = IMG_LoadTexture(renderer, "../assets/my_player.png");
@@ -102,13 +95,13 @@ int main(int argc, char* argv[])
     Camera camera((float)actualWidth);
     WorldGenerator world(GROUND_Y, worldTextures);
 
-    // ---- Decorative clouds (independent of world/camera, screen-space loop) ----
+    // Decorative clouds 
     float cloudX[3] = { 200.0f, 900.0f, 1500.0f };
     float cloudY[3] = { 100.0f, 220.0f, 60.0f };
     float cloudSpeed[3] = { 40.0f, 25.0f, 55.0f };
     float cloudScale[3] = { 1.0f, 0.7f, 1.3f };
 
-    // ---- Game state ----
+    //Game state
     GameState state = GameState::PLAYING;
     int collectibles = 0;
     float furthestX = 0.0f;
@@ -163,7 +156,7 @@ int main(int argc, char* argv[])
         }
 
         if (state == GameState::PLAYING) {
-            // ---- Controls ----
+            // Controls 
             const float WALK_SPEED = 300.0f;
             const float RUN_SPEED = 550.0f;
             float moveSpeed = WALK_SPEED;
@@ -181,7 +174,7 @@ int main(int argc, char* argv[])
                 physics.jump(player, 650.0f);
             }
 
-            // Never scroll/walk left past world start
+            // Never scroll or walk left past world start
             if (player.getX() < 0.0f) {
                 player.setPosition(0.0f, player.getY());
             }
@@ -194,10 +187,10 @@ int main(int argc, char* argv[])
             }
             scaleKeyWasPressed = scaleKeyIsPressed;
 
-            // ---- Physics ----
+            // Physics
             physics.update(player, deltaTime);
 
-            // ---- Ground collision: find if she's over a solid segment ----
+            // Ground collision: find if she's over a solid segment 
             float centerX = player.getX() + player.getWidth() / 2.0f;
             bool onSolidGround = false;
             for (auto& seg : world.getGroundSegments()) {
@@ -215,7 +208,7 @@ int main(int argc, char* argv[])
                 player.setGrounded(false);
             }
 
-            // ---- Platform collision (land on top only) ----
+            // Platform collision 
             for (auto& plat : world.getPlatforms()) {
                 bool horizontallyOver =
                     player.getX() + player.getWidth() > plat.getX() &&
@@ -231,7 +224,7 @@ int main(int argc, char* argv[])
                 }
             }
 
-            // ---- Obstacles block movement like a wall ----
+            // Obstacles block movement like a wall
             for (auto& obs : world.getObstacles()) {
                 if (Collision::checkCollision(player, obs)) {
                     if (Input::isKeyPressed(SDL_SCANCODE_A)) {
@@ -243,7 +236,7 @@ int main(int argc, char* argv[])
                 }
             }
 
-            // ---- Coins ----
+            // Coins 
             for (auto& coin : world.getCoins()) {
                 if (!coin.collected && Collision::checkCollision(player, coin.entity)) {
                     coin.collected = true;
@@ -252,21 +245,21 @@ int main(int argc, char* argv[])
                 }
             }
 
-            // ---- Enemies: touching = game over ----
+            // Enemies: touching = game over
             for (auto& enemy : world.getEnemies()) {
                 if (Collision::checkCollision(player, enemy.entity)) {
                     triggerGameOver();
                 }
             }
 
-            // ---- Hazards: touching = game over ----
+            // Hazards: touching = game over
             for (auto& hazard : world.getHazards()) {
                 if (Collision::checkCollision(player, hazard)) {
                     triggerGameOver();
                 }
             }
 
-            // ---- Fall into a pit = game over (no auto-teleport) ----
+            // Fall into a pit = game over 
             if (player.getY() > actualHeight) {
                 triggerGameOver();
             }
@@ -293,7 +286,7 @@ int main(int argc, char* argv[])
 
         float cameraX = camera.getX();
 
-        // ---- Render ----
+        // Render
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         SDL_RenderClear(renderer);
 

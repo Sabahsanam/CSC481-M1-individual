@@ -20,7 +20,6 @@ Entity::Entity(float x, float y, float width, float height)
     currentFrame = 0;
     animationCounter = 0;
 
-    // Timed-animation fields, unused unless setAnimationSpeed() is called
     frameDuration = 0.0f;
     animationTimer = 0.0f;
     useTimedAnimation = false;
@@ -33,8 +32,6 @@ void Entity::render(SDL_Renderer* renderer)
     float drawWidth = width;
     float drawHeight = height;
 
-    // PIXEL mode (default) leaves everything as-is.
-    // PROPORTIONAL mode resizes/repositions relative to the window's current size vs. the reference resolution.
     if (Scaling::getMode() == ScalingMode::PROPORTIONAL) {
         int windowWidth = 0;
         int windowHeight = 0;
@@ -88,7 +85,7 @@ void Entity::render(SDL_Renderer* renderer)
         }
     }
 
-    // No texture: draw a white rectangle
+    // draws a white rectangle
     else {
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         SDL_RenderFillRect(renderer, &destinationRect);
@@ -121,7 +118,6 @@ void Entity::setSpriteSheet(int frameCount, int frameWidth, int frameHeight)
 
 void Entity::updateAnimation()
 {
-    // Static images do not need animation
     if (frameCount <= 1) {
         return;
     }
@@ -136,7 +132,6 @@ void Entity::updateAnimation()
 
 void Entity::setAnimationSpeed(float framesPerSecond)
 {
-    // Lets a specific entity opt into exact-fps animation instead of the default fixed-tick counter
     if (framesPerSecond <= 0.0f) {
         useTimedAnimation = false;
         return;
@@ -161,7 +156,7 @@ void Entity::updateAnimation(float deltaTime)
 
     if (animationTimer >= frameDuration) {
         currentFrame = (currentFrame + 1) % frameCount;
-        animationTimer -= frameDuration; // keep leftover time instead of dropping it
+        animationTimer -= frameDuration; // keep leftover time
     }
 }
 

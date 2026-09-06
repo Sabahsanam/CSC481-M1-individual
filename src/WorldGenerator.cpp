@@ -4,7 +4,7 @@
 
 const float WorldGenerator::CHUNK_WIDTH = 900.0f;
 
-// ---- Asset frame info (measured, not guessed) ----
+// Asset frame info 
 static const int CRATE_FRAMES = 1, CRATE_W = 64, CRATE_H = 64;
 static const int PLATFORM_FRAMES = 1, PLATFORM_W = 192, PLATFORM_H = 22;
 static const int COIN_FRAMES = 1, COIN_W = 64, COIN_H = 64;
